@@ -3,6 +3,7 @@ package com.lee.querydsl;
 import com.lee.querydsl.entity.Member;
 import com.lee.querydsl.entity.QMember;
 import com.lee.querydsl.entity.Team;
+import com.querydsl.core.QueryResults;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+
+import java.util.List;
 
 import static com.lee.querydsl.entity.QMember.member;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -95,5 +98,27 @@ class QuerydslBasicTest {
                 .fetchOne();
 
         assertThat(findMember.getUsername()).isEqualTo("member1");
+    }
+
+    @Test
+    public void resultFetch(){
+        // 전체 리스트 조회
+        List<Member> fetch = queryFactory.selectFrom(member).fetch();
+
+        // 단건 조회
+        // 없으면 null, 2개 이상이면 에러..
+        Member fetchOne = queryFactory.selectFrom(member).fetchOne();
+
+        // limit 1
+        Member fetchFirst = queryFactory.selectFrom(member).fetchFirst();
+
+        // 페이징 정보 포함, total count 쿼리 추가 실행
+        // fetchResults, fetchCount는 향후 미지원..
+        QueryResults<Member> results = queryFactory.selectFrom(member).fetchResults();
+        results.getTotal();
+        List<Member> content = results.getResults();
+
+        long total = queryFactory.selectFrom(member).fetchCount();
+
     }
 }
