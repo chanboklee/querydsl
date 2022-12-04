@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 
+import static com.lee.querydsl.entity.QMember.member;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -27,6 +28,8 @@ class QuerydslBasicTest {
 
     @BeforeEach
     public void before(){
+        queryFactory = new JPAQueryFactory(em);
+
         Team teamA = new Team("teamA");
         Team teamB = new Team("teamB");
         em.persist(teamA);
@@ -57,7 +60,6 @@ class QuerydslBasicTest {
 
     @Test
     public void startQuerydsl(){
-        queryFactory = new JPAQueryFactory(em);
         QMember m = new QMember("m");
 
         // 컴파일 시점에 오류를 알 수 있다.
@@ -66,6 +68,30 @@ class QuerydslBasicTest {
                 .select(m)
                 .from(m)
                 .where(m.username.eq("member1"))
+                .fetchOne();
+
+        assertThat(findMember.getUsername()).isEqualTo("member1");
+    }
+
+    @Test
+    public void search(){
+        Member findMember = queryFactory
+                .selectFrom(member)
+                .where(member.username.eq("member1").and(member.age.eq(10)))
+                .fetchOne();
+
+        assertThat(findMember.getUsername()).isEqualTo("member1");
+    }
+
+    @Test
+    public void searchAndParam(){
+        Member findMember = queryFactory
+                .selectFrom(member)
+                // and인 경우에 연달아서 작성하는것도 가능
+                .where(
+                        member.username.eq("member1"),
+                        member.age.eq(10)
+                )
                 .fetchOne();
 
         assertThat(findMember.getUsername()).isEqualTo("member1");
