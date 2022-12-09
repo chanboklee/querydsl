@@ -419,4 +419,32 @@ class QuerydslBasicTest {
             System.out.println("s = " + s);
         }
     }
+
+    @Test
+    public void simpleProjection(){
+        // 프로젝션 대상이 하나일 경우 타입을 명확하게 지정할 수 있다.
+        List<String> result = queryFactory.select(member.username)
+                .from(member)
+                .fetch();
+
+        for (String s : result) {
+            System.out.println("s = " + s);
+        }
+    }
+
+    @Test
+    public void tupleProjection(){
+        // 프로젝션 대상이 둘 이상일 경우
+        // repository 안에서만 사용하는게 좋다.. -> querydsl core..에 종속적이기 때문..
+        List<Tuple> result = queryFactory.select(member.username, member.age)
+                .from(member)
+                .fetch();
+
+        for (Tuple tuple : result) {
+            String username = tuple.get(member.username);
+            Integer age = tuple.get(member.age);
+            System.out.println("username="+username);
+            System.out.println("age="+age);
+        }
+    }
 }
