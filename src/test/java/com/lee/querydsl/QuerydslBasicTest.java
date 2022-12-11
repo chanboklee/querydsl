@@ -1,6 +1,7 @@
 package com.lee.querydsl;
 
 import com.lee.querydsl.dto.MemberDto;
+import com.lee.querydsl.dto.QMemberDto;
 import com.lee.querydsl.dto.UserDto;
 import com.lee.querydsl.entity.Member;
 import com.lee.querydsl.entity.QMember;
@@ -507,7 +508,8 @@ class QuerydslBasicTest {
     @Test
     public void findUserDtoSubQuery(){
         QMember memberSub = new QMember("memberSub");
-        List<UserDto> result = queryFactory.select(Projections.fields(UserDto.class,
+        List<UserDto> result =
+                queryFactory.select(Projections.fields(UserDto.class,
                         member.username.as("name"),
                         ExpressionUtils.as(JPAExpressions
                                 .select(memberSub.age.max())
@@ -523,7 +525,8 @@ class QuerydslBasicTest {
 
     @Test
     public void findDtoConstructor(){
-        List<MemberDto> result = queryFactory.select(Projections.constructor(MemberDto.class,
+        List<MemberDto> result = queryFactory.
+                select(Projections.constructor(MemberDto.class,
                         member.username,
                         member.age))
                 .from(member)
@@ -534,4 +537,17 @@ class QuerydslBasicTest {
         }
     }
 
+    // Dto가 Querydsl 라이브러리에 의존해야한다..
+    // compile 오류..
+    @Test
+    public void findDtoByQueryProjection(){
+        List<MemberDto> result = queryFactory
+                .select(new QMemberDto(member.username, member.age))
+                .from(member)
+                .fetch();
+
+        for (MemberDto memberDto : result) {
+            System.out.println("memberDto = " + memberDto);
+        }
+    }
 }
