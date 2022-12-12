@@ -608,4 +608,46 @@ class QuerydslBasicTest {
     private BooleanExpression allEq(String usernameParam, Integer ageParam){
         return usernameEq(usernameParam).and(ageEq(ageParam));
     }
+
+    @Test
+    public void bulkUpdate(){
+
+        // 벌크연산은 영속성 컨텍스트와 상관없이 디비에 바로 날린다..
+        long count = queryFactory
+                .update(member)
+                .set(member.username, "비회원")
+                .where(member.age.lt(20))
+                .execute();
+
+        em.flush();
+        em.clear();
+
+        // 영속성 컨텍스트에 있기 때문에 벌크연산 후 가져와도 영속성 컨텍스트가 우선순위를 가진다..
+        // em.flush, em.clear을 하면 영속성 컨텍스트를 비우기 때문에 값이 같아진다..
+        List<Member> result = queryFactory
+                .selectFrom(member)
+                .fetch();
+
+        for (Member member1 : result) {
+            System.out.println("member1 = " + member1);
+        }
+    }
+
+    @Test
+    public void bulkAdd(){
+        // add.. multiply..
+        // add(-1)
+        long count = queryFactory
+                .update(member)
+                .set(member.age, member.age.add(1))
+                .execute();
+    }
+
+    @Test
+    public void bulkDelete(){
+        long count = queryFactory
+                .delete(member)
+                .where(member.age.gt(10))
+                .execute();
+    }
 }
