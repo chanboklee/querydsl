@@ -650,4 +650,32 @@ class QuerydslBasicTest {
                 .where(member.age.gt(10))
                 .execute();
     }
+
+    // DB에서 함수를 만든 경우에는 직접 등록해서 사용해야 한다..
+    @Test
+    public void sqlFunction(){
+        List<String> result = queryFactory
+                .select(Expressions.stringTemplate("function('replace', {0}, {1}, {2})", member.username, "member", "M"))
+                .from(member)
+                .fetch();
+
+        for (String s : result) {
+            System.out.println("s = " + s);
+        }
+    }
+
+    // 기본적으로 sql에서 내장된 함수는 지원한다..
+    @Test
+    public void sqlFunction1(){
+        List<String> result = queryFactory
+                .select(member.username)
+                .from(member)
+                // .where(member.username.eq(Expressions.stringTemplate("function('lower', {0}", member.username)))
+                .where(member.username.eq(member.username.lower()))
+                .fetch();
+
+        for (String s : result) {
+            System.out.println("s = " + s);
+        }
+    }
 }
