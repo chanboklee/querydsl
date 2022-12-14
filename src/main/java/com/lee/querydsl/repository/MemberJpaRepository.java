@@ -3,6 +3,7 @@ package com.lee.querydsl.repository;
 import com.lee.querydsl.entity.Member;
 import com.lee.querydsl.entity.QMember;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -12,15 +13,13 @@ import java.util.Optional;
 import static com.lee.querydsl.entity.QMember.*;
 
 @Repository
+@RequiredArgsConstructor
 public class MemberJpaRepository {
 
     private final EntityManager em;
-    private final JPAQueryFactory queryFactory;
 
-    public MemberJpaRepository(EntityManager em) {
-        this.em = em;
-        this.queryFactory = new JPAQueryFactory(em);
-    }
+    // 동시성 문제가 발생하지 않는다..
+    private final JPAQueryFactory queryFactory;
 
     public void save(Member member){
         em.persist(member);
