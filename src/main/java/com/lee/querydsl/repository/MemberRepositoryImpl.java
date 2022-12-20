@@ -6,10 +6,12 @@ import com.lee.querydsl.dto.QMemberTeamDto;
 import com.lee.querydsl.entity.Member;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.persistence.EntityManager;
@@ -129,5 +131,41 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
                 .fetchCount();
 
         return new PageImpl<>(content, pageable, total);
+    }
+
+    // 마지막 페이지..
+    public Page<MemberTeamDto> searchComplexTotalPage(MemberSearchCondition condition, Pageable pageable) {
+        List<MemberTeamDto> content = queryFactory
+                .select(new QMemberTeamDto(
+                        member.id.as("memberId"),
+                        member.username,
+                        member.age,
+                        team.id.as("teamId"),
+                        team.name.as("teamName")
+                ))
+                .from(member)
+                .leftJoin(member.team, team)
+                .where(
+                        usernameEq(condition.getUsername()),
+                        teamNameEq(condition.getTeamName()),
+                        ageGoe(condition.getAgeGoe()),
+                        ageLoe(condition.getAgeLoe())
+                )
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        JPAQuery<Member> countQuery = queryFactory
+                .select(member)
+                .from(member)
+                .leftJoin(member.team, team)
+                .where(
+                        usernameEq(condition.getUsername()),
+                        teamNameEq(condition.getTeamName()),
+                        ageGoe(condition.getAgeGoe()),
+                        ageLoe(condition.getAgeLoe())
+                );
+
+        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchCount);
     }
 }
