@@ -134,6 +134,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
     }
 
     // 마지막 페이지..
+    @Override
     public Page<MemberTeamDto> searchComplexTotalPage(MemberSearchCondition condition, Pageable pageable) {
         List<MemberTeamDto> content = queryFactory
                 .select(new QMemberTeamDto(
@@ -166,6 +167,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
                         ageLoe(condition.getAgeLoe())
                 );
 
+        // 적으면 CountQuery를 날리지 않음..
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchCount);
     }
 }
